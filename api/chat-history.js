@@ -1,36 +1,45 @@
-// API route di Vercel untuk menangani request POST dan GET chat history
+import Cors from 'cors';
+
+// Inisialisasi CORS
+const cors = Cors({
+  methods: ['GET', 'POST'],
+  origin: '*',  // Atau ganti dengan origin frontend yang diizinkan, misalnya 'https://bubble-chat-xi.vercel.app'
+});
 
 let chatMap = {}; // key = ticketId, value = array of chat
 
 export default function handler(req, res) {
-  if (req.method === 'POST') {
-    // Tangani POST request untuk menyimpan chat
-    const { ticketId, group, mentionText, mentionFrom, mentionPhone, mentionTimestamp, replyText, replyTimestamp, responseTimeInSeconds } = req.body;
+  // Menjalankan middleware CORS
+  cors(req, res, () => {
+    if (req.method === 'POST') {
+      // Tangani POST request untuk menyimpan chat
+      const { ticketId, group, mentionText, mentionFrom, mentionPhone, mentionTimestamp, replyText, replyTimestamp, responseTimeInSeconds } = req.body;
 
-    if (!ticketId) return res.status(400).json({ error: 'ticketId is required' });
+      if (!ticketId) return res.status(400).json({ error: 'ticketId is required' });
 
-    const chat = {
-      sender: mentionFrom,
-      phone: mentionPhone,
-      text: replyText,
-      group,
-      time: replyTimestamp,
-      isBot: true
-    };
+      const chat = {
+        sender: mentionFrom,
+        phone: mentionPhone,
+        text: replyText,
+        group,
+        time: replyTimestamp,
+        isBot: true
+      };
 
-    if (!chatMap[ticketId]) chatMap[ticketId] = [];
-    chatMap[ticketId].push(chat);
+      if (!chatMap[ticketId]) chatMap[ticketId] = [];
+      chatMap[ticketId].push(chat);
 
-    return res.status(200).send('Chat saved');
-  } 
+      return res.status(200).send('Chat saved');
+    } 
 
-  // Tangani GET request untuk mengambil chat berdasarkan ticketId
-  else if (req.method === 'GET') {
-    const ticketId = req.query.ticketId;
-    if (!ticketId) return res.status(400).json({ error: 'ticketId is required' });
+    // Tangani GET request untuk mengambil chat berdasarkan ticketId
+    else if (req.method === 'GET') {
+      const ticketId = req.query.ticketId;
+      if (!ticketId) return res.status(400).json({ error: 'ticketId is required' });
 
-    res.status(200).json(chatMap[ticketId] || []);
-  } else {
-    res.status(405).json({ error: 'Method Not Allowed' });
-  }
+      res.status(200).json(chatMap[ticketId] || []);
+    } else {
+      res.status(405).json({ error: 'Method Not Allowed' });
+    }
+  });
 }

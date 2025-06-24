@@ -5,7 +5,7 @@ async function fetchAndRender() {
   const ticketId = urlParams.get("ticketId") || '9876543210';
 
   try {
-    const res = await fetch(`http://127.0.0.1:5001/chat-history?ticketId=${ticketId}`);
+    const res = await fetch(`https://bubble-chat-xi.vercel.app/api/chat-history?ticketId=${ticketId}`);
     const data = await res.json();
 
     chatContainer.innerHTML = '';
@@ -17,7 +17,7 @@ async function fetchAndRender() {
     data.forEach((msg) => {
       const bubble = document.createElement('div');
       bubble.className = 'bubble';
-      bubble.innerHTML = `
+      bubble.innerHTML = ` 
         <div class="sender">${msg.sender} (${msg.phone})</div>
         <div>${msg.text}</div>
         <div><small>📅 ${msg.time} | 🧠 ${msg.isBot ? 'Bot' : 'User'}</small></div>
