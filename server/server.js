@@ -4,8 +4,9 @@ const port = 5001;
 
 app.use(express.json());
 
-const chatMap = {}; // key = ticketId, value = array of chat
+let chatMap = {}; // key = ticketId, value = array of chat
 
+// Menangani POST request untuk menyimpan chat
 app.post('/api/push-chat', (req, res) => {
   const { ticketId, group, mentionText, mentionFrom, mentionPhone, mentionTimestamp, replyText, replyTimestamp, responseTimeInSeconds } = req.body;
 
@@ -23,12 +24,17 @@ app.post('/api/push-chat', (req, res) => {
   if (!chatMap[ticketId]) chatMap[ticketId] = [];
   chatMap[ticketId].push(chat);
 
-  res.sendStatus(200);
+  console.log(`Data untuk ticketId ${ticketId} disimpan:`, chatMap[ticketId]); // Debug log untuk melihat data yang disimpan
+
+  return res.status(200).send('Chat saved');
 });
 
-app.get('/chat-history', (req, res) => {
+// Menangani GET request untuk mengambil chat berdasarkan ticketId
+app.get('/api/chat-history', (req, res) => {
   const ticketId = req.query.ticketId;
-  res.json(chatMap[ticketId] || []);
+  if (!ticketId) return res.status(400).json({ error: 'ticketId is required' });
+
+  res.status(200).json(chatMap[ticketId] || []);
 });
 
 app.listen(port, () => {

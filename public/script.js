@@ -2,13 +2,14 @@ async function fetchAndRender() {
   const chatContainer = document.getElementById('chat');
   const errorContainer = document.getElementById('error');
   const urlParams = new URLSearchParams(window.location.search);
-  const ticketId = urlParams.get("ticketId") || '9876543210';
+  const ticketId = urlParams.get("ticketId") || '9876543210'; // Default ticketId jika tidak ada
 
   try {
     const res = await fetch(`https://bubble-chat-xi.vercel.app/api/chat-history?ticketId=${ticketId}`);
     const data = await res.json();
 
-    chatContainer.innerHTML = '';
+    chatContainer.innerHTML = ''; // Reset konten chat sebelum di-render
+
     if (data.length === 0) {
       chatContainer.innerHTML = '<i>Belum ada snapshot.</i>';
       return;
