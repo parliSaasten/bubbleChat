@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>📨 WhatsApp Group Log</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f3f3;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .chat {
+      margin-top: 20px;
+    }
+    .bubble {
+      background: #e1ffc7;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      max-width: 500px;
+    }
+    .sender {
+      font-weight: bold;
+    }
+    .error {
+      color: red;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>💬 WhatsApp Group Log</h2>
+    <div id="chat" class="chat">⏳ Loading...</div>
+    <div id="error" class="error" style="display: none;">❌ Gagal memuat chat</div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

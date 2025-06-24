@@ -1,0 +1,18 @@
+{
+  "platform": "desk",
+  "name": "WhatsApp Bubble Chat",
+  "version": "1.0.0",
+  "description": "Menampilkan pesan mention dari WhatsApp Group",
+  "author": "Alpha",
+  "email": "alpha@yourcompany.com",
+  "modules": {
+    "widget": {
+      "locations": {
+        "ticket.detail.rightpanel": {
+          "url": "app/index.html",
+          "icon": "chat"
+        }
+      }
+    }
+  }
+}
