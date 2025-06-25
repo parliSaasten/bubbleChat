@@ -1,57 +1,50 @@
-import Cors from 'cors';
+let lastRenderedCount = 0;
 
-// Inisialisasi CORS
-const cors = Cors({
-  methods: ['GET', 'POST'],
-  origin: '*',  // Atau ganti dengan origin frontend yang diizinkan, misalnya 'https://bubble-chat-xi.vercel.app'
-});
+async function fetchAndRender() {
+  const chatContainer = document.getElementById('chat');
+  const loadingIndicator = document.getElementById('loading');
+  const errorContainer = document.getElementById('error');
+  const urlParams = new URLSearchParams(window.location.search);
+  const ticketId = urlParams.get("ticketId") || '9876543210';
 
-let chatMap = {};
+  try {
+    loadingIndicator.style.display = 'block';
+    chatContainer.style.display = 'none';
+    errorContainer.style.display = 'none';
 
-export default function handler(req, res) {
-  if (req.method === 'POST') {
-    const {
-      ticketId,
-      group,
-      mentionText,
-      mentionFrom,
-      mentionPhone,
-      mentionTimestamp,
-      replyText,
-      replyTimestamp,
-      responseTimeInSeconds
-    } = req.body;
+    const res = await fetch(`https://bubble-chat-xi.vercel.app/api/chat-history?ticketId=${ticketId}`);
+    const data = await res.json();
 
-    if (!ticketId) return res.status(400).json({ error: 'ticketId is required' });
+    if (data.length === lastRenderedCount) return;
 
-    const mentionChat = {
-      sender: mentionFrom,
-      phone: mentionPhone,
-      text: mentionText,
-      group,
-      time: mentionTimestamp,
-      isBot: false
-    };
+    chatContainer.innerHTML = '';
 
-    const replyChat = {
-      sender: 'Bot',
-      phone: '-',
-      text: replyText,
-      group,
-      time: replyTimestamp,
-      isBot: true
-    };
+    if (data.length === 0) {
+      chatContainer.innerHTML = '<i>Belum ada snapshot.</i>';
+    } else {
+      data.forEach((msg) => {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.innerHTML = `
+          <div class="sender">${msg.sender} (${msg.phone})</div>
+          <div>${msg.text}</div>
+          <div><small>📅 ${msg.time} | ${msg.isBot ? '🧠 Bot' : '🗣️ User'}</small></div>
+        `;
+        chatContainer.appendChild(bubble);
+      });
+    }
 
-    if (!chatMap[ticketId]) chatMap[ticketId] = [];
-    chatMap[ticketId].push(mentionChat, replyChat);
-
-    return res.status(200).send('Mention + Reply saved');
+    lastRenderedCount = data.length;
+    chatContainer.style.display = 'block';
+  } catch (err) {
+    console.error("❌ Gagal ambil data:", err);
+    errorContainer.style.display = 'block';
+  } finally {
+    loadingIndicator.style.display = 'none';
   }
-
-  if (req.method === 'GET') {
-    const ticketId = req.query.ticketId;
-    return res.status(200).json(chatMap[ticketId] || []);
-  }
-
-  res.status(405).json({ error: 'Method not allowed' });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  fetchAndRender();
+  setInterval(fetchAndRender, 10000); // refresh tiap 10 detik
+});
