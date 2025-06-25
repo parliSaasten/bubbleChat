@@ -6,40 +6,52 @@ const cors = Cors({
   origin: '*',  // Atau ganti dengan origin frontend yang diizinkan, misalnya 'https://bubble-chat-xi.vercel.app'
 });
 
-let chatMap = {}; // key = ticketId, value = array of chat
+let chatMap = {};
 
 export default function handler(req, res) {
-  // Menjalankan middleware CORS
-  cors(req, res, () => {
-    if (req.method === 'POST') {
-      // Tangani POST request untuk menyimpan chat
-      const { ticketId, group, mentionText, mentionFrom, mentionPhone, mentionTimestamp, replyText, replyTimestamp, responseTimeInSeconds } = req.body;
+  if (req.method === 'POST') {
+    const {
+      ticketId,
+      group,
+      mentionText,
+      mentionFrom,
+      mentionPhone,
+      mentionTimestamp,
+      replyText,
+      replyTimestamp,
+      responseTimeInSeconds
+    } = req.body;
 
-      if (!ticketId) return res.status(400).json({ error: 'ticketId is required' });
+    if (!ticketId) return res.status(400).json({ error: 'ticketId is required' });
 
-      const chat = {
-        sender: mentionFrom,
-        phone: mentionPhone,
-        text: replyText,
-        group,
-        time: replyTimestamp,
-        isBot: true
-      };
+    const mentionChat = {
+      sender: mentionFrom,
+      phone: mentionPhone,
+      text: mentionText,
+      group,
+      time: mentionTimestamp,
+      isBot: false
+    };
 
-      if (!chatMap[ticketId]) chatMap[ticketId] = [];
-      chatMap[ticketId].push(chat);
+    const replyChat = {
+      sender: 'Bot',
+      phone: '-',
+      text: replyText,
+      group,
+      time: replyTimestamp,
+      isBot: true
+    };
 
-      return res.status(200).send('Chat saved');
-    } 
+    if (!chatMap[ticketId]) chatMap[ticketId] = [];
+    chatMap[ticketId].push(mentionChat, replyChat);
 
-    // Tangani GET request untuk mengambil chat berdasarkan ticketId
-    else if (req.method === 'GET') {
-      const ticketId = req.query.ticketId;
-      if (!ticketId) return res.status(400).json({ error: 'ticketId is required' });
+    return res.status(200).send('Mention + Reply saved');
+  }
 
-      res.status(200).json(chatMap[ticketId] || []);
-    } else {
-      res.status(405).json({ error: 'Method Not Allowed' });
-    }
-  });
+  if (req.method === 'GET') {
+    const ticketId = req.query.ticketId;
+    return res.status(200).json(chatMap[ticketId] || []);
+  }
+
+  res.status(405).json({ error: 'Method not allowed' });
 }
