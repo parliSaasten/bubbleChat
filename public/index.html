@@ -2,49 +2,44 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WhatsApp Group Log</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>📨 WhatsApp Group Log</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      margin: 0;
+      background: #f3f3f3;
       padding: 20px;
     }
-
-    h2 {
-      margin-bottom: 10px;
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-
+    .chat {
+      margin-top: 20px;
+    }
     .bubble {
-      background-color: #d9ffd9;
+      background: #e1ffc7;
       padding: 10px;
-      border-radius: 10px;
+      border-radius: 8px;
       margin-bottom: 10px;
       max-width: 500px;
     }
-
     .sender {
       font-weight: bold;
-      margin-bottom: 4px;
     }
-
-    #loading, #error {
-      margin-top: 10px;
-      font-size: 14px;
-    }
-
-    #error {
+    .error {
       color: red;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h2>💬 WhatsApp Group Log</h2>
-  <div id="loading">⏳ Loading...</div>
-  <div id="error" style="display: none;">❌ Gagal memuat chat</div>
-  <div id="chat"></div>
+  <div class="container">
+    <h2>💬 WhatsApp Group Log</h2>
+    <div id="chat" class="chat">⏳ Loading...</div>
+    <div id="error" class="error" style="display: none;">❌ Gagal memuat chat</div>
+  </div>
 
   <script src="script.js"></script>
 </body>

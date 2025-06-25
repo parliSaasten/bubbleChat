@@ -1,50 +1,61 @@
-let lastRenderedCount = 0;
+let chatMap = {}; // simpan global in-memory data
 
-async function fetchAndRender() {
-  const chatContainer = document.getElementById('chat');
-  const loadingIndicator = document.getElementById('loading');
-  const errorContainer = document.getElementById('error');
-  const urlParams = new URLSearchParams(window.location.search);
-  const ticketId = urlParams.get("ticketId") || '9876543210';
+export default function handler(req, res) {
+  if (req.method === 'POST') {
+    try {
+      const {
+        ticketId,
+        group,
+        mentionText,
+        mentionFrom,
+        mentionPhone,
+        mentionTimestamp,
+        replyText,
+        replyTimestamp,
+        responseTimeInSeconds
+      } = req.body;
 
-  try {
-    loadingIndicator.style.display = 'block';
-    chatContainer.style.display = 'none';
-    errorContainer.style.display = 'none';
+      if (!ticketId) return res.status(400).json({ error: 'ticketId is required' });
 
-    const res = await fetch(`https://bubble-chat-xi.vercel.app/api/chat-history?ticketId=${ticketId}`);
-    const data = await res.json();
+      const mentionChat = {
+        sender: mentionFrom || 'Unknown',
+        phone: mentionPhone || '-',
+        text: mentionText || '-',
+        group,
+        time: mentionTimestamp || new Date().toISOString(),
+        isBot: false
+      };
 
-    if (data.length === lastRenderedCount) return;
+      const replyChat = {
+        sender: 'Bot',
+        phone: '-',
+        text: replyText || '-',
+        group,
+        time: replyTimestamp || new Date().toISOString(),
+        isBot: true
+      };
 
-    chatContainer.innerHTML = '';
+      if (!chatMap[ticketId]) chatMap[ticketId] = [];
+      chatMap[ticketId].push(mentionChat, replyChat);
 
-    if (data.length === 0) {
-      chatContainer.innerHTML = '<i>Belum ada snapshot.</i>';
-    } else {
-      data.forEach((msg) => {
-        const bubble = document.createElement('div');
-        bubble.className = 'bubble';
-        bubble.innerHTML = `
-          <div class="sender">${msg.sender} (${msg.phone})</div>
-          <div>${msg.text}</div>
-          <div><small>📅 ${msg.time} | ${msg.isBot ? '🧠 Bot' : '🗣️ User'}</small></div>
-        `;
-        chatContainer.appendChild(bubble);
-      });
+      return res.status(200).json({ success: true });
+    } catch (err) {
+      console.error('❌ Error handling POST:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
     }
-
-    lastRenderedCount = data.length;
-    chatContainer.style.display = 'block';
-  } catch (err) {
-    console.error("❌ Gagal ambil data:", err);
-    errorContainer.style.display = 'block';
-  } finally {
-    loadingIndicator.style.display = 'none';
   }
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-  fetchAndRender();
-  setInterval(fetchAndRender, 10000); // refresh tiap 10 detik
-});
+  if (req.method === 'GET') {
+    try {
+      const ticketId = req.query.ticketId;
+      if (!ticketId) return res.status(400).json({ error: 'ticketId is required' });
+
+      return res.status(200).json(chatMap[ticketId] || []);
+    } catch (err) {
+      console.error('❌ Error handling GET:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
+
+  return res.status(405).json({ error: 'Method not allowed' });
+}
